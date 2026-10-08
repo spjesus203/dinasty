@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DISPROVAR · Catálogo mayorista</title>
+
+<!-- Vista previa al compartir por WhatsApp / redes.
+     Sube una imagen "portada.jpg" (1200 x 630 px) al repositorio y cambia TU-USUARIO por tu usuario de GitHub. -->
+<meta name="description" content="Catálogo mayorista de DISPROVAR. Arma tu pedido y envíalo directo a tu asesor.">
+<meta property="og:title" content="DISPROVAR · Catálogo mayorista">
+<meta property="og:description" content="Arma tu pedido y envíalo directo a tu asesor.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://TU-USUARIO.github.io/catalogo/portada.jpg">
+<meta name="theme-color" content="#f8fafc">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --fondo: #f8fafc;
+    --tarjeta: rgba(255, 255, 255, 0.78);
+    --borde: #e2e8f0;
+    --texto: #0f172a;
+    --suave: #64748b;
+    --acento: #0f766e;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; height: 100%;
+    background: var(--fondo);
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    color: var(--texto);
+  }
+
+  /* El catálogo ocupa toda la pantalla */
+  #app {
+    position: fixed; inset: 0;
+    width: 100%; height: 100%;
+    border: 0; display: block;
+    background: var(--fondo);
+  }
+
+  /* Pantalla de carga */
+  #carga {
+    position: fixed; inset: 0; z-index: 2;
+    display: grid; place-items: center;
+    padding: 24px;
+    background:
+      radial-gradient(60% 50% at 20% 10%, #e0f2fe 0%, transparent 70%),
+      radial-gradient(50% 40% at 85% 90%, #f1f5f9 0%, transparent 70%),
+      var(--fondo);
+    transition: opacity .35s ease;
+  }
+  #carga.oculto { opacity: 0; pointer-events: none; }
+
+  .vidrio {
+    width: min(360px, 100%);
+    padding: 32px 28px;
+    text-align: center;
+    background: var(--tarjeta);
+    border: 1px solid var(--borde);
+    border-radius: 24px;
+    box-shadow: 0 20px 50px -20px rgba(15, 23, 42, 0.18), inset 0 1px 0 #fff;
+    backdrop-filter: blur(18px) saturate(1.4);
+    -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  }
+  .empresa { margin: 0; font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; }
+  .detalle { margin: 6px 0 24px; font-size: .95rem; color: var(--suave); }
+
+  .anillo {
+    width: 40px; height: 40px; margin: 0 auto;
+    border-radius: 50%;
+    border: 3px solid var(--borde);
+    border-top-color: var(--acento);
+    animation: girar .9s linear infinite;
+  }
+  @keyframes girar { to { transform: rotate(360deg); } }
+
+  #ayuda { display: none; margin-top: 24px; }
+  #ayuda.visible { display: block; }
+  #ayuda p { margin: 0 0 14px; font-size: .9rem; color: var(--suave); line-height: 1.5; }
+  .boton {
+    display: inline-block;
+    padding: 12px 20px;
+    border-radius: 14px;
+    background: var(--acento); color: #fff;
+    font-weight: 600; font-size: .95rem;
+    text-decoration: none;
+  }
+  .boton:focus-visible { outline: 3px solid #99f6e4; outline-offset: 2px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .anillo { animation-duration: 2.5s; }
+    #carga { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="carga" role="status" aria-live="polite">
+  <div class="vidrio">
+    <p class="empresa">DISPROVAR</p>
+    <p class="detalle" id="detalle">Cargando catálogo…</p>
+    <div class="anillo" aria-hidden="true"></div>
+    <div id="ayuda">
+      <p>El catálogo está tardando más de lo normal. Puedes abrirlo directamente:</p>
+      <a class="boton" id="directo" href="#" target="_top" rel="noopener">Abrir catálogo</a>
+    </div>
+  </div>
+</div>
+
+<iframe id="app" title="Catálogo DISPROVAR" allow="clipboard-write; web-share"></iframe>
+
+<script>
+  /* ====== ÚNICO DATO QUE CAMBIAS SI ALGÚN DÍA CAMBIA LA IMPLEMENTACIÓN ====== */
+  var APP_URL = 'https://script.google.com/macros/s/AKfycbzxBxgZ519WcESlSkWWsLzefNDzB8b6Fvqg0P1_yd_E0JyNI6QO78SY39gD6FuepP6ulw/exec';
+  var EMPRESA = 'DISPROVAR';
+  /* ========================================================================= */
+
+  (function () {
+    var params = new URLSearchParams(location.search);
+    var qs = params.toString();
+    var destino = APP_URL + (qs ? '?' + qs : '');
+
+    // Título y texto de carga según la marca del enlace
+    var marca = (params.get('marca') || '').replace(/[-_]+/g, ' ').trim().toUpperCase();
+    var esTodo = !marca || marca === 'TODO' || marca === 'TODAS';
+    if (params.has('ajustes') || params.get('page') === 'ajustes') {
+      document.title = 'Ajustes · ' + EMPRESA;
+      document.getElementById('detalle').textContent = 'Cargando ajustes…';
+    } else if (!esTodo) {
+      document.title = marca + ' · ' + EMPRESA;
+      document.getElementById('detalle').textContent = 'Cargando catálogo de ' + marca + '…';
+    }
+
+    var carga = document.getElementById('carga');
+    var app = document.getElementById('app');
+    document.getElementById('directo').href = destino;
+
+    var listo = false;
+    app.addEventListener('load', function () {
+      if (listo) return;
+      listo = true;
+      carga.classList.add('oculto');
+    });
+
+    // Si en 15 s no cargó, se ofrece abrirlo directamente
+    setTimeout(function () {
+      if (!listo) document.getElementById('ayuda').classList.add('visible');
+    }, 15000);
+
+    app.src = destino;
+  })();
+</script>
+</body>
+</html>
